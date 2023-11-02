@@ -1,0 +1,9 @@
+body{
+    background-color: blanchedalmond;
+}
+.card-container{
+    display: flex;
+    border-radius: 3rem;
+    gap: 1rem;
+    justify-content: center;
+}
