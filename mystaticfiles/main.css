@@ -1,9 +1,14 @@
 body{
     background-color: blanchedalmond;
 }
+.container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+}
 .card-container{
-    display: flex;
+    display: grid;
     border-radius: 3rem;
     gap: 1rem;
     justify-content: center;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
 }
