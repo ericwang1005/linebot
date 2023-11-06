@@ -62,3 +62,7 @@
 - git remote add origin master
 
 - git remote -v
+
+# 複製專案
+
+- git clone <倉庫的網址> (前提是要是 owner)
