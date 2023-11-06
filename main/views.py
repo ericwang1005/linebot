@@ -9,8 +9,18 @@ from datetime import datetime
 import time
 import random
 from threading import Thread
+from django.shortcuts import render
+from django.conf import settings
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+# Create your views here.
+from linebot import LineBotApi, WebhookHandler, WebhookParser
+from linebot.exceptions import InvalidSignatureError, LineBotApiError
+from linebot.models import MessageEvent, TextSendMessage
 # Create your views here.
 url = 'https://www.manhuaren.com/search/'
+line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
+parse = WebhookParser(settings.LINE_CHANNEL_SECRET)
 
 
 def get_books(request):
