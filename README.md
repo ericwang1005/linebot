@@ -54,6 +54,7 @@
 # 檢視 commit log
 
 - git log
+- git --oneline(可以將所有 log 變成一行一行)
 
 # 綁定遠端倉庫
 

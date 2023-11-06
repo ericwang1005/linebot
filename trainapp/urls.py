@@ -17,10 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from main import views
+from django.urls import re_path as url
 
 urlpatterns = [
+    url("^callback", views.callback),
     path('admin/', admin.site.urls),
     path('books/', views.get_books),
-    path('', views.index),
+    path('', views.get_lottory2),
     # path('lottory/',views.get_lottory2)
+    # index
 ]

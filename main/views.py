@@ -16,11 +16,53 @@ from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 from linebot import LineBotApi, WebhookHandler, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextSendMessage
+from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage
 # Create your views here.
 url = 'https://www.manhuaren.com/search/'
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parse = WebhookParser(settings.LINE_CHANNEL_SECRET)
+
+
+@csrf_exempt
+def callback(request):
+    if request.method == 'POST':
+        signature = request.META['HTTP_X_LINE_SIGNATURE']
+        body = request.body.decode('utf-8')
+        try:
+            events = parse.parse(body, signature)
+        except InvalidSignatureError:
+            return HttpResponseForbidden()
+        except LineBotApiError:
+            return HttpResponseBadRequest()
+        for event in events:
+            if isinstance(event, MessageEvent):
+                message = event.message.text
+                message_object = None
+                if message == 'Hello':
+                    message_object = TextSendMessage(text='Hello Xuan')
+                elif 'Lottory' in message:
+                    reply_message = get_lottory_num()
+                    message_object = TextSendMessage(text=reply_message)
+                elif "mrt" or 'MRT' in message:
+                    if '台中' in message:
+                        imgurl = 'https://assets.piliapp.com/s3pxy/mrt_taiwan/taichung/20201112_zh.png?v=2'
+                    elif '高雄' in message:
+                        imgurl = 'https://upload.wikimedia.org/wikipedia/commons/5/56/%E9%AB%98%E9%9B%84%E6%8D%B7%E9%81%8B%E8%B7%AF%E7%B6%B2%E5%9C%96_%282020%29.png'
+                    else:
+                        imgurl = "https://assets.piliapp.com/s3pxy/mrt_taiwan/taipei/20230214_zh.png"
+                    message_object = ImageSendMessage(
+                        original_content_url=imgurl, preview_image_url=imgurl)
+                else:
+                    message_object = TextSendMessage(text="I don't get it")
+                # if event.message.text=='hello':
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    # TextSendMessage(text='hello world')
+                    message_object
+                )
+        return HttpResponse()
+    else:
+        return HttpResponseBadRequest()
 
 
 def get_books(request):
@@ -74,6 +116,13 @@ def get_lottory(request):
     s_num = random.randint(1, 50)
     num_str = ' '.join(map(str, nums))+f' 特別號:{s_num}'
     return HttpResponse(f'<h1>{num_str}</h1>')
+
+
+def get_lottory_num():
+    nums = (random.sample(range(1, 50), 6))
+    s_num = random.randint(1, 50)
+    num_str = ' '.join(map(str, nums))+f' 特別號:{s_num}'
+    return num_str
 
 
 def get_lottory2(request):
