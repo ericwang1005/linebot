@@ -17,14 +17,18 @@ from django.views.decorators.csrf import csrf_exempt
 from linebot import LineBotApi, WebhookHandler, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage
+from crawl.invoice import get_invoice_numbers, search_invoice_bingo
 # Create your views here.
 url = 'https://www.manhuaren.com/search/'
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parse = WebhookParser(settings.LINE_CHANNEL_SECRET)
+start_invoice = False
+numbers = []
 
 
 @csrf_exempt
 def callback(request):
+    global start_invoice, numbers
     if request.method == 'POST':
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
@@ -38,7 +42,22 @@ def callback(request):
             if isinstance(event, MessageEvent):
                 message = event.message.text
                 message_object = None
-                if message == 'Hello':
+                # 判斷是否進行對獎模式
+                if start_invoice:
+                    if message == '0':
+                        start_invoice = False
+                        message_text = '離開發票對獎模式'
+                    else:
+                        message_text = search_invoice_bingo(message, numbers)
+                        message_text += '\n==>請輸入下一組號碼(0:exit)'
+                    message_object = TextSendMessage(text=message_text)
+                elif message == "發票":
+                    numbers = get_invoice_numbers()
+                    message_text = '進入發票對獎模式==>\n本期最新發票對獎號碼:'+','.join(numbers)
+                    message_text += '\n請開始輸入您的發票號碼(後三碼):'
+                    message_object = TextSendMessage(text=message_text)
+                    start_invoice = True
+                elif message == 'Hello':
                     message_object = TextSendMessage(text='Hello Xuan')
                 elif 'Lottory' in message:
                     reply_message = get_lottory_num()

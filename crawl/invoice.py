@@ -1,4 +1,23 @@
-from tools import getSoup
+import requests
+from bs4 import BeautifulSoup
+
+
+def getSoup(url, post_data=None):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'}
+    try:
+        if post_data is not None:
+            resp = requests.post(url, post_data, headers=headers)
+        else:
+            resp = requests.get(url, headers=headers)
+        resp.encoding = 'utf-8'
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, 'lxml')
+            return soup
+        else:
+            print('網頁取得失敗')
+    except Exception as e:
+        print('網址錯誤', e)
 
 
 def get_invoice_numbers():
@@ -19,25 +38,26 @@ def get_invoice_numbers():
     return numbers
 
 
-def search_invoice_bingo(invoice_number, bingo):
+# 進行兌獎
+def search_invoice_bingo(invoice_number, numbers):
     bingo = False
     for i in range(len(numbers)):
-        if i == 0 or i == 1:
-            if numbers[i][5:] == invoice_number[len(invoice_number)-3:]:
-                bingo = True
-                break
-    message = ''
+        if numbers[i][5:] == invoice_number[len(invoice_number)-3:]:
+            bingo = True
+            break
+
     if bingo:
         if i == 0:
-            message = '恭喜有機會中特別獎1000W'
+            message = '超有機會中特別獎1000萬(八個號碼)'
         elif i == 1:
-            message = '恭喜有機會中頭獎200w'
+            message = '有機會中特獎200萬(八個號碼)'
         else:
-            message = '恭喜中頭獎,有機會中20W(三個號碼中200)'
+            message = '有機會中頭獎20萬(三個號碼已中200元)'
 
-        message += f'\n請繼續對獎 ==> {numbers[i]}'
+        message += f'\n請繼續對其他號碼==>{numbers[i]}'
     else:
-        message = '下次再努力囉！'
+        message = '@@沒有中獎～～'
+
     return message
 
 
